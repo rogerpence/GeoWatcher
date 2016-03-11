@@ -5,13 +5,9 @@ This JavaScript module uses JavaScript's geolocation object to report the curren
 
 ### Public methods
 
-**startGeoWatch**
+**startGeoLocationCapture**
 
 Start capturing the geo location.
-
-**stopGeoWatch**
-
-Stop capturing the geo location. 
 
 
 ### Configuration options
@@ -26,11 +22,11 @@ If true, show captured locations to the console.
  
 Number of seconds to wait between reporting the captured location.
 
-This module uses the geolocation object's [`watchPosition`](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition#Specifications) method. The documentation says this method is called each time the position of the device changes. I'm not sure what the API designers consider a position change, but this routine is mighty busy on my non-moving desktop PC! `captureSecondsInterval` doesn't control how often the `watchPosition` method is called (it's called by the device); it controls how often the most recently captured location is reported to the function specified by the `captureCallback` function.  
+This module uses the geolocation object's [`watchPosition`](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition#Specifications) method. The documentation says this method is called each time the position of the device changes, I think that's true for Chrome but FireFox seems to call this in a very short loop continually. So, each time `watchPostion` is called this module stops it after five seconds; but the `setInterval` in `startGeoLocatonCapture` calls it every `captureSecondsInterval.` 
 
 **captureCallback** 
 
-A callback function that will be called each time the location is captured. This function is passed this position object:
+A callback function that will be called every `captureSecondsInterval.` This function is passed this position object:
  
 	{
     	"latitude": n,
@@ -66,5 +62,30 @@ These provide optional element ids for two hidden fields to which the captured c
         console.log("latitude: " + position.latitude);
         console.log("longitude: " + position.longitude);
 
-		// Use Ajax here to pass the captured values back to the server. 
+		// Use Ajax here to pass the captured values back to the server.
+        var data = {
+            Latitude: position.latitude.toFixed(4),
+            Longitude: position.longitude.toFixed(4)
+        }
+
+        var jsonString = JSON.stringify(data);
+      
+        var jqxhr = $.ajax(
+            {
+                url: 'action/add',
+                data: jsonString,
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json'
+            }
+        )
+        .done(function (retdata) {
+            console.log("success:" + retdata);
+        })
+        .fail(function (retdata) {
+            console.log("error:" + retdata);
+        })
+        .always(function () {
+            //alert("finished");
+        });
     }
