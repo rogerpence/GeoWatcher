@@ -2,18 +2,17 @@
 
     asnaHelper.getGeoLocationManager = function() {
         var counter = 0;
-        var showGeoWatcherCaptureToConsole = true;
         var captureSecondsInterval = 1000 * 10; // 10 second default capture interval.
         var watcher;
         var currentPosition = {
             "latitude": 0,
             "longitude": 0
         };
-        var latitudeElementId;
-        var longitudeElementId;
+
         var captureCallback;
+
         var emulateMovement = false;
-        var movementFactor = .0145;
+        var movementFactor = .0145; // for emulated movement.
         var emulatedCurrentPosition = {
             "latitude": 0,
             "longitude": 0
@@ -40,6 +39,7 @@
         };
 
         function recordCurrentPosition(position) {
+            counter++;
             currentPosition.latitude = Number.parseFloat(position.coords.latitude.toFixed(4));
             currentPosition.longitude = Number.parseFloat(position.coords.longitude.toFixed(4));
 
@@ -54,34 +54,13 @@
                 emulatedCurrentPosition.longitude = Number.parseFloat(emulatedCurrentPosition.longitude.toFixed(4));
             }
 
-            if (showGeoWatcherCaptureToConsole) {
-                console.log("Counter: " + (++counter));
-                if (!emulateMovement) {
-                    console.log("Latitude: " + currentPosition.latitude);
-                    console.log("Longitude: " + currentPosition.longitude);
-                }
-                else {
-                    console.log("EmulatedLatitude: " + emulatedCurrentPosition.latitude);
-                    console.log("EmulatedLongitude: " + emulatedCurrentPosition.longitude);
-                }
-            }
-
             if (captureCallback && currentPosition.latitude !== 0) {
                 if (!emulateMovement) {
-                    refreshHiddenElements(currentPosition);
-                    captureCallback(currentPosition);
+                    captureCallback(currentPosition, counter);
                 }
                 else {
-                    refreshHiddenElements(emulatedCurrentPosition);
-                    captureCallback(emulatedCurrentPosition);
+                    captureCallback(emulatedCurrentPosition, counter);
                 }
-            }
-        }
-
-        function refreshHiddenElements(position) {
-            if (!!document.getElementById(latitudeElementId) && !!document.getElementById(longitudeElementId)) {
-                document.getElementById(latitudeElementId).value = position.latitude;
-                document.getElementById(longitudeElementId).value = position.longitude;
             }
         }
 
@@ -116,7 +95,22 @@
             }
         }
 
+        function calculateDistance(lat1, lon1, lat2, lon2, unit) {
+            var radlat1 = Math.PI * lat1/180
+            var radlat2 = Math.PI * lat2/180
+            var theta = lon1-lon2
+            var radtheta = Math.PI * theta/180
+            var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+            dist = Math.acos(dist)
+            dist = dist * 180/Math.PI
+            dist = dist * 60 * 1.1515
+            if (unit=="K") { dist = dist * 1.609344 }
+            if (unit=="N") { dist = dist * 0.8684 }
+            return dist
+        }
+        
         return {
-            "startGeoLocationCapture": startGeoLocationCapture
+            "startGeoLocationCapture": startGeoLocationCapture,
+            "calculateDistance": calculateDistance
         }
     }();

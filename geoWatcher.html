@@ -17,18 +17,48 @@
         "captureSecondsInterval": 6,
         "captureCallback": getLocationCaptured,
         "emulateMovement": true
-        // "latitudeElementId": "latitudexx",
-        // "longitudeElementId": "longitudexx",
+    }
+
+    var persist = {        
+        "previousPosition": null,
+        "silly" : null,
+
+        savePosition: function(a, b) {
+            this.previousPosition = a;
+            this.silly = b;
+        }
     };
 
-    asnaHelper.getGeoLocationManager.startGeoWatch(options);
+    asnaHelper.getGeoLocationManager.startGeoLocationCapture(options);
 
-    function getLocationCaptured(position) {
+    function getLocationCaptured(position, counter) {
         // This function is called every captureSecondsInterval with the
         // most recently captured location.
-        console.log('--------------------');
+        var distance;
+
+        console.log(counter + ' --------------------');
+        
+        if (persist.previousPosition) {
+            console.log(persist.previousPosition);
+            console.log(persist.silly);
+
+            console.log("previous latitude: " + persist.previousPosition.latitude);        
+            console.log("previous longitude: " + persist.previousPosition.longitude);
+        }            
+
         console.log("latitude: " + position.latitude);
         console.log("longitude: " + position.longitude);
+
+        if (persist.previousPosition) {
+            distance = asnaHelper.getGeoLocationManager.calculateDistance(persist.previousPosition.latitude, persist.previousPosition.longitude, position.latitude, position.longitude);
+            console.log("distance: " + distance);
+        }            
+
+        persist.savePosition(position,position);
+        // persist.previousPosition = position;
+        // persist.silly = position;
+
+        var x = 'x';
     }
 </script>
 
