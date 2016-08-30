@@ -73,11 +73,7 @@
                 if (emulatedCurrentPosition.latitude == 0 && emulatedCurrentPosition.longitude == 0) {
                     emulatedCurrentPosition.latitude = currentPosition.latitude;
                     emulatedCurrentPosition.longitude = currentPosition.longitude;
-                }
-                emulatedCurrentPosition.latitude += movementFactor;
-                emulatedCurrentPosition.longitude += movementFactor;
-                emulatedCurrentPosition.latitude = Number.parseFloat(emulatedCurrentPosition.latitude.toFixed(4));
-                emulatedCurrentPosition.longitude = Number.parseFloat(emulatedCurrentPosition.longitude.toFixed(4));
+                }                    
             }
 
             if (captureCallback && currentPosition.latitude !== 0) {
@@ -88,6 +84,13 @@
                     captureCallback(emulatedCurrentPosition, counter);
                 }
             }
+
+            if (emulateMovement) {
+                emulatedCurrentPosition.latitude += movementFactor;
+                emulatedCurrentPosition.longitude += movementFactor;
+                emulatedCurrentPosition.latitude = Number.parseFloat(emulatedCurrentPosition.latitude.toFixed(4));
+                emulatedCurrentPosition.longitude = Number.parseFloat(emulatedCurrentPosition.longitude.toFixed(4));
+            }                
         }
 
         function displayError(error) {
