@@ -18,25 +18,51 @@
             "longitude": 0
         };
 
+        var lat = 27.5;
+        var log = -98.3;
+
         function captureGeoLocation(options) {
             if (navigator.geolocation) {
 
-                var timeoutVal = 10 * 1000 * 1000;
-                // Use watchPosition instead of getCurrentPostion to poll for
-                // constant location update.
-                watcher = navigator.geolocation.watchPosition(
-                    recordCurrentPosition,
-                    displayError,
-                    { enableHighAccuracy: true, timeout: timeoutVal, maximumAge: 250 }
-                );
+                // recordCurrentPositionTest();    
+                //navigator.geolocation.getCurrentPosition(recordCurrentPositionTest, displayError);                
+                navigator.geolocation.getCurrentPosition(recordCurrentPosition, displayError);                
 
-                window.setTimeout( function () {
-                    window.navigator.geolocation.clearWatch(watcher);
-                },
-                    5000 // Stop watchPosition after 5 seconds.
-                );
+                // window.setTimeout( function () {
+                //     window.navigator.geolocation.clearWatch(watcher);
+                // },
+                //     5000 // Stop watchPosition after 5 seconds.
+                // );
+                
+
+                // var timeoutVal = 10 * 1000 * 1000;
+                // // Use watchPosition instead of getCurrentPostion to poll for
+                // // constant location update.
+                // watcher = navigator.geolocation.watchPosition(
+                //     recordCurrentPosition,
+                //     displayError,
+                //     { enableHighAccuracy: true, timeout: timeoutVal, maximumAge: 250 }
+                // );
+
+                // window.setTimeout( function () {
+                //     window.navigator.geolocation.clearWatch(watcher);
+                // },
+                //     5000 // Stop watchPosition after 5 seconds.
+                // );
             }
         };
+
+        function recordCurrentPositionTest() {
+            emulatedCurrentPosition.latitude = lat;
+            emulatedCurrentPosition.longitude = log;
+
+            captureCallback(emulatedCurrentPosition, counter++);            
+
+            lat += movementFactor;
+            log += movementFactor;
+            lat = Number.parseFloat(lat.toFixed(4));
+            log = Number.parseFloat(log.toFixed(4));
+        }            
 
         function recordCurrentPosition(position) {
             counter++;
@@ -83,10 +109,12 @@
                 emulateMovement = options.emulateMovement;
             }
 
+            counter = 0;
+
             if (navigator.geolocation) {
                 // A prime-the-pump capture, then captures recur every captureSecondsInterval.
                 captureGeoLocation();
-                setInterval(function () {
+                options.captureId = setInterval(function() {
                     captureGeoLocation();
                 }, captureSecondsInterval);
             }

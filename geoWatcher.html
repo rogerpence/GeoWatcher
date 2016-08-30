@@ -5,6 +5,7 @@
     <title>Document</title>
 </head>
 <body>
+    <a href='#' id='start-button'>Start</a>&nbsp;<a href='#' id='cancel-button'>Cancel</a><br>
     <input type="text" id="latitude">
     <input type="text" id="longitude">
 </body>
@@ -12,53 +13,65 @@
 <script src="geowatcher.js"></script>
 
 <script>
+    console.clear();
+
     var options = {
-        "showGeoWatcherCaptureToConsole": false,
-        "captureSecondsInterval": 6,
-        "captureCallback": getLocationCaptured,
-        "emulateMovement": true
+        showGeoWatcherCaptureToConsole: false,
+        captureSecondsInterval: 6,
+        captureCallback: getLocationCaptured,
+        emulateMovement: true, 
+        captureId: null
     }
 
-    var persist = {        
-        "previousPosition": null,
-        "silly" : null,
+    var JORGEpreviousLatitude = null;        
+    var JORGEpreviousLongitude = null;        
 
-        savePosition: function(a, b) {
-            this.previousPosition = a;
-            this.silly = b;
-        }
-    };
+    var cancelButton = document.querySelector('#cancel-button');
+    var startButton = document.querySelector('#start-button');
 
-    asnaHelper.getGeoLocationManager.startGeoLocationCapture(options);
+    cancelButton.addEventListener('click', function() {
+        console.clear();
+        clearInterval(options.captureId);
+    }, false);
+
+    startButton.addEventListener('click', function() {
+        console.clear();
+        previousPosition = null;
+        asnaHelper.getGeoLocationManager.startGeoLocationCapture(options);
+    }, false);  
 
     function getLocationCaptured(position, counter) {
         // This function is called every captureSecondsInterval with the
         // most recently captured location.
-        var distance;
 
         console.log(counter + ' --------------------');
-        
-        if (persist.previousPosition) {
-            console.log(persist.previousPosition);
-            console.log(persist.silly);
+        console.log("current latitude: " + position.latitude);
+        console.log("curent longitude: " + position.longitude);
 
-            console.log("previous latitude: " + persist.previousPosition.latitude);        
-            console.log("previous longitude: " + persist.previousPosition.longitude);
+       
+        if (JORGEpreviousLatitude) {
+            let distance = 0;
+            let lat1, log1, lat2, log2 = 0;
+
+            // console.log("previous latitude: " + JORGEpreviousLatitude);        
+            // console.log("previous longitude: " + JORGEpreviousLongitude);
+
+            lat1 = JORGEpreviousLatitude; 
+            log1 = JORGEpreviousLongitude; 
+            lat2 = position.latitude; 
+            log2 = position.longitude;
+
+            distance = asnaHelper.getGeoLocationManager.calculateDistance(lat1, log1, lat2, log2); 
+
+            // distance = asnaHelper.getGeoLocationManager.calculateDistance(persist.previousPosition.latitude, 
+            //                                                               persist.previousPosition.longitude, 
+            //                                                               position.latitude, 
+            //                                                               position.longitude);
+            // console.log("distance: " + distance);
         }            
 
-        console.log("latitude: " + position.latitude);
-        console.log("longitude: " + position.longitude);
-
-        if (persist.previousPosition) {
-            distance = asnaHelper.getGeoLocationManager.calculateDistance(persist.previousPosition.latitude, persist.previousPosition.longitude, position.latitude, position.longitude);
-            console.log("distance: " + distance);
-        }            
-
-        persist.savePosition(position,position);
-        // persist.previousPosition = position;
-        // persist.silly = position;
-
-        var x = 'x';
+        JORGEpreviousLatitude = position.latitude;        
+        JORGEpreviousLongitude = position.longitude;        
     }
 </script>
 
